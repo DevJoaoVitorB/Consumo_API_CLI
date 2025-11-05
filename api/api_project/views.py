@@ -48,7 +48,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response({"error": "Credenciais Inválidas!"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    @action(detail=False, methods=["POST"])
+    @action(detail=False, methods=["POST"], permission_classes=[permissions.IsAuthenticated])
     def logout(self, request):
         logout(request)
         return Response({"message": "Logout efetuado com sucesso!"}, status=status.HTTP_200_OK)
@@ -61,7 +61,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = permissions.IsAuthenticated
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -74,7 +74,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
         if not name:
             return Response({"error": "O projeto necessita de um nome!"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         project = Project.objects.create(
             name=name,
             description=description or None,
@@ -93,13 +93,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def tasks(self, request, pk=None):
         project = self.get_object()
         tasks = project.tasks.all()
-        serializer = self.get_serializer(tasks, many=True)
+        serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = permissions.IsAuthenticated
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
